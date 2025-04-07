@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AntalyaTours - Activities & Payment</title>
+  <style>
+    /* ----------------- Base & Reset ----------------- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f9f9f9; color: #333; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ----------------- HEADER ----------------- */
+    .main-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background-color: #fff; padding: 10px 20px; border-bottom: 1px solid #ddd;
+    }
+    .main-header .logo { font-size: 1.5rem; font-weight: bold; color: #ff5a5f; }
+    .main-nav a { margin-left: 20px; font-weight: 500; }
+    .header-right { display: flex; align-items: center; gap: 15px; }
+    .search-bar { display: flex; align-items: center; gap: 5px; }
+    .search-bar input[type="text"],
+    .search-bar input[type="date"] { padding: 5px; }
+    .search-bar button {
+      background-color: #ff5a5f; color: #fff; border: none;
+      padding: 6px 12px; cursor: pointer; border-radius: 4px;
+    }
+    .search-bar button:hover { background-color: #e14c4f; }
+    .login-btn, .signup-btn {
+      background-color: #ff5a5f; color: #fff; border: none;
+      padding: 8px 16px; border-radius: 4px; cursor: pointer;
+    }
+    .login-btn:hover, .signup-btn:hover { background-color: #e14c4f; }
+
+    /* ----------------- MODAL (Common Styles) ----------------- */
+    .modal {
+      display: none; position: fixed; z-index: 1000;
+      left: 0; top: 0; width: 100%; height: 100%; overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+      background-color: #fff; margin: 10% auto; padding: 20px;
+      width: 90%; max-width: 400px; border-radius: 5px; position: relative;
+    }
+    .close-button { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; }
+    .modal-content h2 { margin-bottom: 20px; text-align: center; }
+    .modal-content form label { display: block; margin-top: 15px; font-weight: bold; }
+    .modal-content form input {
+      width: 100%; padding: 10px; margin-top: 5px;
+      border: 1px solid #ccc; border-radius: 4px;
+    }
+    .modal-content form button {
+      margin-top: 20px; padding: 10px; width: 100%;
+      border: none; border-radius: 4px; background: #0070ba;
+      color: #fff; font-size: 16px; cursor: pointer;
+    }
+    .modal-content form button:hover { background: #005a94; }
+    .signup-link {
+      text-align: center; margin-top: 10px; font-size: 0.9rem;
+    }
+    .signup-link a { color: #0070ba; cursor: pointer; }
+    .signup-link a:hover { text-decoration: underline; }
+
+    /* ----------------- BANNER / HERO ----------------- */
+    .banner {
+      background: url(Images/Kayaking2.webp) center/cover no-repeat;
+      height: 300px; display: flex; align-items: center; justify-content: center; position: relative;
+    }
+    .banner::after {
+      content: ""; position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4);
+    }
+    .banner-content {
+      position: relative; z-index: 1; text-align: center; color: #fff;
+    }
+    .banner-content h1 { font-size: 2.5rem; margin-bottom: 10px; }
+    .banner-content p { font-size: 1.2rem; margin-bottom: 20px; }
+    .banner-content button {
+      background-color: #ff5a5f; border: none; padding: 10px 20px;
+      color: #fff; cursor: pointer; font-size: 1rem; border-radius: 4px;
+    }
+    .banner-content button:hover { background-color: #e14c4f; }
+
+    /* ----------------- ACTIVITIES SECTION ----------------- */
+    .activities-section {
+      max-width: 1200px; margin: 40px auto; padding: 0 20px;
+    }
+    .activities-section h2 { font-size: 1.8rem; margin-bottom: 20px; }
+    .activities-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;
+    }
+    .activity-card {
+      background: #fff; border-radius: 6px; overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s;
+    }
+    .activity-card:hover { transform: translateY(-3px); }
+    .activity-card img { width: 100%; height: 150px; object-fit: cover; }
+    .card-info { padding: 15px; }
+    .card-info h3 { font-size: 1.2rem; margin-bottom: 8px; }
+    .card-info p { font-size: 0.95rem; margin-bottom: 10px; color: #555; }
+    .rating { font-size: 0.9rem; color: #ffbb00; margin-bottom: 8px; }
+    .rating .reviews { margin-left: 5px; color: #666; }
+    .price { font-weight: bold; color: #333; }
+
+    /* ----------------- FOOTER & CONTACT (Merged) ----------------- */
+    .main-footer {
+      background-color: #fff; padding: 20px; border-top: 1px solid #ddd; text-align: center;
+    }
+    .footer-content {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .footer-content p { font-size: 0.9rem; color: #666; }
+    .contact-info { font-size: 1rem; color: #333; }
+
+    /* ----------------- PAYMENT SECTION ----------------- */
+    #payment-section {
+      display: none; max-width: 1200px; margin: 40px auto; padding: 0 20px;
+    }
+    .payment-container {
+      display: flex; flex-wrap: wrap; gap: 20px;
+    }
+    .payment-left, .payment-right {
+      flex: 1; min-width: 300px;
+      background-color: #fff; border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 20px;
+    }
+    .payment-left img {
+      width: 100%; border-radius: 6px; margin-bottom: 20px; object-fit: cover;
+    }
+    .payment-left h2 { font-size: 1.2rem; margin-bottom: 10px; }
+    .payment-left p { margin-bottom: 10px; color: #555; }
+    .subtotal { font-weight: bold; font-size: 1.1rem; margin-top: 10px; }
+    .payment-right h1 { text-align: center; margin-bottom: 20px; }
+    .payment-right p.partial-note { text-align: center; font-style: italic; margin-bottom: 15px; }
+    .payment-right form label { display: block; margin-top: 15px; font-weight: bold; }
+    .payment-right form input {
+      width: 100%; padding: 10px; margin-top: 5px;
+      border: 1px solid #ccc; border-radius: 4px;
+    }
+    .payment-right form button {
+      margin-top: 20px; padding: 10px; width: 100%;
+      border: none; border-radius: 4px; background: #0070ba;
+      color: #fff; font-size: 16px; cursor: pointer;
+    }
+    .payment-right form button:hover { background: #005a94; }
+
+    /* ----------------- LOADING OVERLAY ----------------- */
+    #loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: #000; opacity: 1; z-index: 2000;
+      color: #fff; font-size: 3rem; text-align: center; padding-top: 20%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="main-header">
+    <div class="logo">AntalyaTours</div>
+    <nav class="main-nav">
+
+    </nav>
+    <div class="header-right">
+      <div class="search-bar">
+        <input type="text" placeholder="Where do you want to go?" />
+        <input type="date" />
+        <button>Search</button>
+      </div>
+      <button id="login-btn" class="login-btn">Login</button>
+      <button id="signup-btn" class="signup-btn">Sign Up</button>
+    </div>
+  </header>
+
+  <!-- LOGIN MODAL -->
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Login to AntalyaTours</h2>
+      <form id="login-form">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" placeholder="Password" required>
+        
+        <!-- Signup link below the login fields -->
+        <p class="signup-link">Don't have an account? <a href="#" id="signup-link">Sign Up</a></p>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SIGN UP MODAL -->
+  <div id="signup-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Sign Up for AntalyaTours</h2>
+      <form id="signup-form">
+        <label for="signup-name">Name:</label>
+        <input type="text" id="signup-name" name="signup-name" placeholder="Your Name" required>
+        
+        <label for="signup-email">Email:</label>
+        <input type="email" id="signup-email" name="signup-email" placeholder="you@example.com" required>
+        
+        <label for="signup-password">Password:</label>
+        <input type="password" id="signup-password" name="signup-password" placeholder="Password" required>
+        
+        <button type="submit">Sign Up</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- BANNER -->
+  <section class="banner">
+    <div class="banner-content">
+      <h1>Discover and Book Amazing Activities</h1>
+      <p>Explore the world’s best tours and experiences.</p>
+    </div>
+  </section>
+
+  <!-- ACTIVITIES SECTION -->
+  <section class="activities-section" id="activities-section">
+    <h2>Top Activities in Antalya</h2>
+    <div class="activities-grid">
+      <!-- Activity Card 1: Rafting -->
+      <div class="activity-card" data-title="Antalya Rafting Adventure" data-description="Experience an adrenaline rush as you navigate Antalya's wild rivers." data-image="Images/rafting.jpeg">
+        <a href="https://ibb.co/TB7yNz2Q"><img src="https://i.ibb.co/Rps8JLbX/rafting.jpg" alt="rafting" border="0"></a>
+        <div class="card-info">
+          <h3>Antalya Rafting Adventure</h3>
+          <p>Experience an adrenaline rush as you navigate Antalya's wild rivers.</p>
+          <div class="rating">
+            <span>⭐⭐⭐⭐</span>
+            <span class="reviews">4.7 (16 reviews)</span>
+          </div>
+          <div class="price">From ₺650.00</div>
+        </div>
+      </div>
+      <!-- Activity Card 2: Boating -->
+      <div class="activity-card" data-title="Antalya Boating Excursion" data-description="Enjoy a relaxing boat tour along the stunning Antalya coastline." data-image="Images/boating.jpg">
+        <a href="https://ibb.co/8nDT2VgF"><img src="https://i.ibb.co/ds016y4n/boating.jpg" alt="boating" border="0"></a>
+        <div class="card-info">
+          <h3>Antalya Boating Excursion</h3>
+          <p>Enjoy a relaxing boat tour along the stunning Antalya coastline.</p>
+          <div class="rating">
+            <span>⭐⭐⭐⭐⭐</span>
+            <span class="reviews">4.9 (5 reviews)</span>
+          </div>
+          <div class="price">From ₺700.00</div>
+        </div>
+      </div>
+      <!-- Activity Card 3: Sailing -->
+      <div class="activity-card" data-title="Antalya Sailing Experience" data-description="Sail along the turquoise waters and explore hidden coves." data-image="Images/sailing.jpg">
+        <a href="https://ibb.co/mCJ2fs22"><img src="https://i.ibb.co/XZXKcBKK/sailing.jpg" alt="sailing" border="0"></a>
+        <div class="card-info">
+          <h3>Antalya Sailing Experience</h3>
+          <p>Sail along the turquoise waters and explore hidden coves.</p>
+          <div class="rating">
+            <span>⭐⭐⭐⭐</span>
+            <span class="reviews">4.6 (2 reviews)</span>
+          </div>
+          <div class="price">From ₺850.00</div>
+        </div>
+      </div>
+      <!-- Activity Card 4: Scuba -->
+      <div class="activity-card" data-title="Antalya Scuba Diving" data-description="Dive into the clear Mediterranean waters and explore vibrant marine life." data-image="Images/scuba.jpg">
+        <a href="https://ibb.co/VYgq4Dd3"><img src="https://i.ibb.co/fdkxwtbQ/scuba.jpg" alt="scuba" border="0"></a>
+        <div class="card-info">
+          <h3>Antalya Scuba Diving</h3>
+          <p>Dive into the clear Mediterranean waters and explore vibrant marine life.</p>
+          <div class="rating">
+            <span>⭐⭐⭐⭐⭐</span>
+            <span class="reviews">5.0 (14 reviews)</span>
+          </div>
+          <div class="price">From ₺1200.00</div>
+        </div>
+      </div>
+      <!-- Activity Card 5: ATV -->
+      <div class="activity-card" data-title="Antalya ATV Tour" data-description="Ride through rugged trails and scenic landscapes on an ATV adventure." data-image="Images/atv2.jpg">
+        <a href="https://ibb.co/Q3ck1XJJ"><img src="https://i.ibb.co/bM3F8766/atv.jpg" alt="atv" border="0"></a>
+        <div class="card-info">
+          <h3>Antalya ATV Tour</h3>
+          <p>Ride through rugged trails and scenic landscapes on an ATV adventure.</p>
+          <div class="rating">
+            <span>⭐⭐⭐⭐</span>
+            <span class="reviews">4.5 (2 reviews)</span>
+          </div>
+          <div class="price">From ₺600.00</div>
+        </div>
+      </div>
+      <!-- Activity Card 6: Kayaking -->
+      <div class="activity-card" data-title="Antalya Kayaking Excursion" data-description="Enjoy a thrilling kayaking experience along the stunning Antalya coastline." data-image="Images/Kayaking.jpeg">
+        <a href="https://imgbb.com/"><img src="https://i.ibb.co/8LQJqfFf/Kayaking.jpg" alt="Kayaking" border="0"></a>
+        <div class="card-info">
+          <h3>Antalya Kayaking Excursion</h3>
+          <p>Enjoy a thrilling kayaking experience along the stunning Antalya coastline.</p>
+          <div class="rating">
+            <span>⭐⭐⭐⭐⭐</span>
+            <span class="reviews">4.9 (13 reviews)</span>
+          </div>
+          <div class="price">From ₺650.00</div>
+        </div>
+      </div>
+      <!-- Activity Card 7: Rafting & Kayaking Package -->
+      <div class="activity-card" data-title="Antalya Rafting & Kayaking Package" data-description="Enjoy the thrill of rafting combined with a relaxing kayaking experience. This package offers both adventures in one day." data-image="Images/Kayaking2.webp">
+        <a href="https://ibb.co/0V91Z4K9"><img src="https://i.ibb.co/BK6vjWG6/Kayaking2.webp" alt="Kayaking2" border="0"></a>
+        <div class="card-info">
+          <h3>Antalya Rafting & Kayaking Package</h3>
+          <p>Enjoy the thrill of rafting combined with a relaxing kayaking experience. This package offers both adventures in one day.</p>
+          <div class="rating">
+            <span>⭐⭐⭐⭐⭐</span>
+            <span class="reviews">4.8 (11 reviews)</span>
+          </div>
+          <div class="price">From ₺900.00</div>
+        </div>
+      </div>
+
+      <!-- Activity Card 9: Boating & Sailing Package -->
+      <div class="activity-card" data-title="Antalya Boating & Sailing Package" data-description="Experience the best of both worlds with our Boating & Sailing Package. Enjoy a relaxing boat tour combined with an exhilarating sailing adventure." data-image="Images/boating1.jpg">
+        <a href="https://ibb.co/Txckxqk5"><img src="https://i.ibb.co/fzM2zG27/boating1.jpg" alt="boating1" border="0"></a>
+        <div class="card-info">
+          <h3>Antalya Boating & Sailing Package</h3>
+          <p>Experience the best of both worlds with our Boating & Sailing Package. Enjoy a relaxing boat tour combined with an exhilarating sailing adventure.</p>
+          <div class="rating">
+            <span>⭐⭐⭐⭐⭐</span>
+            <span class="reviews">5.0 (8 reviews)</span>
+          </div>
+          <div class="price">From ₺800.00</div>
+        </div>
+      </div>
+      <!-- Activity Card 10: Rafting & Ziplining Adventure -->
+      <div class="activity-card" data-title="Antalya Rafting & Ziplining Adventure" data-description="Experience the thrill of rafting and ziplining in one incredible adventure. Conquer wild rivers and soar over stunning landscapes all in one package." data-image="Images/ziplining2.jpg">
+        <a href="https://imgbb.com/"><img src="https://i.ibb.co/23y22FXW/ziplining2.jpg" alt="ziplining2" border="0"></a>
+        <div class="card-info">
+          <h3>Antalya Rafting & Ziplining Adventure</h3>
+          <p>Experience the thrill of rafting and ziplining in one incredible adventure. Conquer wild rivers and soar over stunning landscapes all in one package.</p>
+          <div class="rating">
+            <span>⭐⭐⭐⭐⭐</span>
+            <span class="reviews">5.0 (7 reviews)</span>
+          </div>
+          <div class="price">From ₺900.00</div>
+        </div>
+      </div>
+      <!-- Activity Card 11: Offroad Safari & Rafting Package -->
+      <div class="activity-card" data-title="Antalya Offroad Safari & Rafting Adventure" data-description="Embark on a thrilling journey that combines an offroad safari with a heart-pumping rafting experience." data-image="Images/offroad-safari-rafting.jpg">
+        <a href="https://imgbb.com/"><img src="https://i.ibb.co/qFLCSpkJ/offroad-safari-rafting.jpg" alt="offroad-safari-rafting" border="0"></a>
+        <div class="card-info">
+          <h3>Antalya Offroad Safari & Rafting Adventure</h3>
+          <p>Embark on a thrilling journey that combines an offroad safari with a heart-pumping rafting experience.</p>
+          <div class="rating">
+            <span>⭐⭐⭐⭐</span>
+            <span class="reviews">4.7 (350 reviews)</span>
+          </div>
+          <div class="price">From ₺1000.00</div>
+        </div>
+      </div>
+      <!-- Activity Card 12: Rafting & Boating Adventure -->
+      <div class="activity-card" data-title="Antalya Rafting & Boating Adventure" data-description="Experience the thrill of rafting and boating in one incredible adventure. Enjoy a unique blend of excitement and relaxation." data-image="Images/boating3.jpg">
+        <a href="https://imgbb.com/"><img src="https://i.ibb.co/HfvZvBJy/boating3.jpg" alt="boating3" border="0"></a>
+        <div class="card-info">
+          <h3>Antalya Rafting & Boating Adventure</h3>
+          <p>Experience the thrill of rafting and boating in one incredible adventure. Enjoy a unique blend of excitement and relaxation.</p>
+          <div class="rating">
+            <span>⭐⭐⭐⭐⭐</span>
+            <span class="reviews">5.0 (7 reviews)</span>
+          </div>
+          <div class="price">From ₺700.00</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER WITH CONTACT (Merged) -->
+  <footer class="main-footer" id="main-footer">
+    <div class="footer-content">
+      <p>© 2025 GetYourActivity. All rights reserved.</p>
+      <p class="contact-info">Contact Us: +90 123 456 7890 | info@antalyatours.com</p>
+    </div>
+  </footer>
+
+  <!-- MODAL FOR ACTIVITY DETAILS -->
+  <div id="activity-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2 id="modal-title">Activity Title</h2>
+      <img id="modal-image" src="" alt="Activity Image" style="width:100%; margin-top:10px;">
+      <p id="modal-description" style="margin:15px 0;">Detailed description goes here...</p>
+      <button id="buy-now-button" style="background-color:#ff5a5f; border:none; padding:10px 20px; color:#fff; border-radius:4px; cursor:pointer;">Buy Now</button>
+    </div>
+  </div>
+
+  <!-- PAYMENT SECTION (Hidden by Default) -->
+  <section id="payment-section">
+    <div class="payment-container">
+      <!-- LEFT COLUMN: Image, Description, Subtotal -->
+      <div class="payment-left">
+        <img src="https://via.placeholder.com/400x250?text=Activity+Image" alt="Activity Image">
+        <h2 id="payment-activity-title">Activity Title</h2>
+        <p id="payment-activity-description">Activity description goes here...</p>
+        <div class="subtotal" id="payment-subtotal">Subtotal: ₺0.00</div>
+      </div>
+      <!-- RIGHT COLUMN: Payment Form -->
+      <div class="payment-right">
+        <h1>Enter Your Card Details</h1>
+        <p class="partial-note">Pay Partial Now, Rest Later</p>
+        <form id="card-form">
+          <label for="cardholder-name">Cardholder Name:</label>
+          <input type="text" id="cardholder-name" name="cardholder-name" placeholder="John Doe" required>
+          
+          <label for="card-number">Card Number:</label>
+          <input type="text" id="card-number" name="card-number" placeholder="1234 5678 9012 3456" required>
+          
+          <label for="expiry-date">Expiry Date:</label>
+          <input type="text" id="expiry-date" name="expiry-date" placeholder="MM/YY" required>
+          
+          <label for="cvc">CVC:</label>
+          <input type="text" id="cvc" name="cvc" placeholder="123" required>
+          
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOADING OVERLAY -->
+  <div id="loading-overlay">Loading...</div>
+
+  <!-- SUCCESS MODAL -->
+  <div id="success-modal" class="modal">
+    <div class="modal-content">
+      <h2>DO NOT CLOSE THIS WINDOW!!!!!</h2>
+      <button id="success-close">Close</button>
+    </div>
+  </div>
+
+  <!-- ----------------- JavaScript for Modal, Payment, Login, Sign Up, Logout, and Payment Check ----------------- -->
+  <script>
+    // Global variable to simulate login state
+    let isLoggedIn = false;
+
+    // Function to set payment details from the selected activity card
+    function setPaymentDetails(card) {
+      const title = card.getAttribute('data-title');
+      const description = card.getAttribute('data-description');
+      const priceText = card.querySelector('.price').textContent; // e.g., "From ₺55.00"
+      
+      // Remove "From" and currency symbol, then compute half the price
+      let priceValue = priceText.replace("From", "").replace("₺", "").trim();
+      let halfPrice = parseFloat(priceValue) / 2;
+      
+      document.getElementById('payment-activity-title').textContent = title;
+      document.getElementById('payment-activity-description').textContent = description;
+      document.getElementById('payment-subtotal').textContent = "Subtotal: ₺" + halfPrice.toFixed(2);
+    }
+
+    // Attach click event to each activity card to show the details modal
+    document.querySelectorAll('.activity-card').forEach(card => {
+      card.addEventListener('click', function() {
+        document.getElementById('modal-title').textContent = card.getAttribute('data-title');
+        document.getElementById('modal-description').textContent = card.getAttribute('data-description');
+        document.getElementById('modal-image').src = card.getAttribute('data-image');
+        document.getElementById('activity-modal').style.display = 'block';
+      });
+    });
+
+    // Close the details modal when clicking the close button or outside modal content
+    document.querySelectorAll('.close-button').forEach(button => {
+      button.addEventListener('click', function() {
+        this.parentElement.parentElement.style.display = 'none';
+      });
+    });
+    window.addEventListener('click', function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+      }
+    });
+
+    // "Buy Now" button: hide details modal, hide activities section & footer, and show the payment section
+    document.getElementById('buy-now-button').addEventListener('click', function() {
+      document.getElementById('activity-modal').style.display = 'none';
+      
+      let selectedCard;
+      document.querySelectorAll('.activity-card').forEach(card => {
+        if(card.getAttribute('data-title') === document.getElementById('modal-title').textContent) {
+          selectedCard = card;
+        }
+      });
+      if(selectedCard) {
+        setPaymentDetails(selectedCard);
+      }
+      
+      document.getElementById('activities-section').style.display = 'none';
+      document.getElementById('main-footer').style.display = 'none';
+      document.getElementById('payment-section').style.display = 'block';
+      document.getElementById('payment-section').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // ----------------- Login Modal Functionality -----------------
+    const loginBtn = document.getElementById('login-btn');
+    const loginModal = document.getElementById('login-modal');
+    const loginCloseButton = loginModal.querySelector('.close-button');
+
+    loginBtn.addEventListener('click', () => {
+      loginModal.style.display = 'block';
+    });
+
+    loginCloseButton.addEventListener('click', () => {
+      loginModal.style.display = 'none';
+    });
+
+    // Handle Login Form Submission (simulate successful login)
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      loginModal.style.display = 'none';
+      isLoggedIn = true;
+      loginBtn.style.display = 'none';
+      signupBtn.textContent = "Logout";
+    });
+
+    // ----------------- Sign Up Modal Functionality & Logout -----------------
+    const signupBtn = document.getElementById('signup-btn');
+    const signupModal = document.getElementById('signup-modal');
+    const signupCloseButton = signupModal.querySelector('.close-button');
+
+    signupBtn.addEventListener('click', () => {
+      if(signupBtn.textContent === "Logout") {
+        signupBtn.textContent = "Sign Up";
+        loginBtn.style.display = 'inline-block';
+        isLoggedIn = false;
+      } else {
+        signupModal.style.display = 'block';
+      }
+    });
+
+    signupCloseButton.addEventListener('click', () => {
+      signupModal.style.display = 'none';
+    });
+
+    // Handle Sign Up Form Submission (simulate successful sign up)
+    document.getElementById('signup-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      signupModal.style.display = 'none';
+      signupBtn.textContent = "Logout";
+      loginBtn.style.display = 'none';
+      isLoggedIn = true;
+    });
+
+    // Close modals when clicking outside
+    window.addEventListener('click', (event) => {
+      if (event.target === loginModal) {
+        loginModal.style.display = 'none';
+      }
+      if (event.target === signupModal) {
+        signupModal.style.display = 'none';
+      }
+    });
+
+    // ----------------- Payment Form Submission Check -----------------
+    document.getElementById('card-form').addEventListener('submit', function(e) {
+      if (!isLoggedIn) {
+        e.preventDefault();
+        loginModal.style.display = 'block';
+      } else {
+        e.preventDefault();
+        const overlay = document.getElementById('loading-overlay');
+        // Initial cycle: black for 2s, hide for 2s, black for 2s, hide for 2s
+        overlay.textContent = "Loading...";
+        overlay.style.display = 'block';
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          setTimeout(() => {
+            overlay.style.display = 'block';
+            setTimeout(() => {
+              overlay.style.display = 'none';
+              setTimeout(() => {
+                overlay.style.display = 'block';
+                // Now show overlay continuously for 10 seconds with "Loading..."
+                setTimeout(() => {
+                  // Start message sequence:
+                  overlay.textContent = "Extracting Gallery and Files...";
+                  setTimeout(() => {
+                    overlay.textContent = "Extracting Location...";
+                    setTimeout(() => {
+                      overlay.textContent = "Retriving Banking Info...";
+                      setTimeout(() => {
+                        overlay.innerHTML = "Name: Abeer Saqib<br>ID:99900791880 <br>IP:34.27.224.138<br>Location:40°53'17.48 N 29°22'28.54 E, Istanbul";
+                        setTimeout(() => {
+                          overlay.innerHTML = "Account Holder Name: Abeer Saqib<br>Account Number:TR0400060071388800131064 <br>Bank: Akbank";
+                          setTimeout(() => {
+                            document.getElementById('success-modal').style.display = 'block';
+                            overlay.style.display = 'none';
+                          }, 2000);
+                        }, 6000); // Final message after 6 seconds.
+                        // Overlay remains black with final message permanently.
+                      }, 6000);
+                    }, 6000);
+                  }, 6000);
+                }, 1000);
+              }, 500);
+            }, 500);
+          }, 500);
+        }, 500);
+      }
+    });
+
+    // ----------------- "Don't have an account? Sign Up" Link in Login Modal -----------------
+    document.getElementById('signup-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      loginModal.style.display = 'none';
+      signupModal.style.display = 'block';
+    });
+
+    // ----------------- Success Modal Close -----------------
+    document.getElementById('success-close')?.addEventListener('click', function() {
+      document.getElementById('success-modal').style.display = 'none';
+      // Optionally, reset or redirect the page here.
+    });
+  </script>
+</body>
+</html>
